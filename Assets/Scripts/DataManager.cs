@@ -9,4 +9,8 @@ public class DataManager : Singleton<DataManager> {
         StagesData = StagesData.Get();
         Debug.Log($"last: {StagesData.stages.Length}");
     }
+
+    void Start() {
+        
+    }
 }

@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class RecyclableScrollView : MonoBehaviour {
+public class MapUI_StagesScrollView : MonoBehaviour {
     [SerializeField] ScrollRect scrollRect;
     [SerializeField] RectTransform contentRect;
-    [SerializeField] RecyclableScrollItem itemPrefab;
+    [SerializeField] MapUI_Stage itemPrefab;
     
     int itemCount;
-    LinkedList<RecyclableScrollItem> items = new();
+    LinkedList<MapUI_Stage> items = new();
     List<int> dataList = new();
     float itemHeight;
     float itemWidth;
@@ -22,15 +22,15 @@ public class RecyclableScrollView : MonoBehaviour {
     const int BUFFER = 2;
     const int ITEMS_PER_ROW = 4;
 
-    void Start() {
-        itemCount = StagesData.MAX_STAGES;
+    public void Initialize(int itemCount) {
+        this.itemCount = itemCount;
         var testDataList = new List<int>();
-        debt = (ITEMS_PER_ROW - itemCount % ITEMS_PER_ROW) % ITEMS_PER_ROW;
-        var groupIndex = (itemCount + debt) / ITEMS_PER_ROW - 1;
-        for (int i = itemCount + debt; i >= 1; i -= 4) {
+        debt = (ITEMS_PER_ROW - this.itemCount % ITEMS_PER_ROW) % ITEMS_PER_ROW;
+        var groupIndex = (this.itemCount + debt) / ITEMS_PER_ROW - 1;
+        for (int i = this.itemCount + debt; i >= 1; i -= 4) {
             var group = new List<int>();
             for (int j = 0; j < 4 && (i - j) >= 1; j++) {
-                if (i - j <= itemCount) {
+                if (i - j <= this.itemCount) {
                     group.Add(i-j);
                 }
             }
@@ -43,11 +43,11 @@ public class RecyclableScrollView : MonoBehaviour {
             groupIndex--;
         }
 
-        Initialize(testDataList);
+        SpawnItems(testDataList);
         scrollRect.normalizedPosition = new Vector2(0, 0);
     }
 
-    void Initialize(List<int> dataList) {
+    void SpawnItems(List<int> dataList) {
         this.dataList = dataList;
 
         var scrollRT = scrollRect.GetComponent<RectTransform>();
@@ -108,7 +108,7 @@ public class RecyclableScrollView : MonoBehaviour {
         }
     }
 
-    void UpdateItem(RecyclableScrollItem item, int index) {
+    void UpdateItem(MapUI_Stage item, int index) {
         var row = 0 <= index + debt ? (index + debt) / ITEMS_PER_ROW : (index + debt - 1) / ITEMS_PER_ROW;
         var col = row == 0 && shiftFirstRowToLeft ? Mathf.Abs(index) % ITEMS_PER_ROW : Mathf.Abs(index + debt) % ITEMS_PER_ROW;
         var pivot = item.RectTransform.pivot;

@@ -555,7 +555,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 9128217343293187882}
+  m_TargetGraphic: {fileID: 3419225091329744525}
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
@@ -578,9 +578,7 @@ MonoBehaviour:
   - {fileID: 8021958277303641666}
   - {fileID: 7923475197697405407}
   lockImage: {fileID: 5062336703070768321}
-  stageData:
-    stars: 0
-    maze: 
+  selfButton: {fileID: 9073158455491744187}
 --- !u!1 &7178710083251629426
 GameObject:
   m_ObjectHideFlags: 0

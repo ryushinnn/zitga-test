@@ -1,16 +1,25 @@
 ﻿using System;
+using Sirenix.OdinInspector;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class Maze : MonoBehaviour {
     [SerializeField] Cell cellPrefab;
 
     Cell[] cells;
+    MazeData data;
+    Vector2Int start;
+    Vector2Int end;
 
     const float CELL_SIZE = 0.5f;
     const int WIDTH = 10;
     const int HEIGHT = 13;
 
-    void Start() {
+    void Awake() {
+        SpawnCells();
+    }
+
+    void SpawnCells() {
         cells = new Cell[WIDTH * HEIGHT];
         var offsetX = CELL_SIZE * (WIDTH - 1) / -2f;
         var offsetY = CELL_SIZE * (HEIGHT - 1) / 2f;
@@ -23,8 +32,27 @@ public class Maze : MonoBehaviour {
             cell.transform.localScale = Vector3.one * CELL_SIZE;
             cells[i] = cell;
         }
+    }
 
-        var data = new MazeData(WIDTH, HEIGHT);
+    public void Initialize(CellData[,] grid, Vector2Int origin, Vector2Int destination) {
+        data = new MazeData(grid);
+        start = origin;
+        end = destination;
+        GenerateMaze();
+    }
+
+    public void Initialize(out CellData[,] grid, out Vector2Int origin, out Vector2Int destination) {
+        data = new MazeData(WIDTH, HEIGHT);
+        start = new Vector2Int(0, 0);
+        end = new Vector2Int(Random.Range(1, WIDTH), Random.Range(1, HEIGHT));
+        GenerateMaze();
+        
+        grid = data.Grid;
+        origin = start;
+        destination = end;
+    }
+
+    void GenerateMaze() {
         var debug = "";
         for (int y = 0; y < HEIGHT; y++) {
             string debugLine = "";
@@ -45,5 +73,14 @@ public class Maze : MonoBehaviour {
         }
 
         Debug.Log(debug);
+        Debug.Log("Destination: " + end);
+        var path = MazePathFinder.Find(data.Grid, start, end);
+        foreach (var cell in cells) {
+            cell.Highlight(false);
+        }
+        foreach (var node in path) {
+            int index = node.y * WIDTH + node.x;
+            cells[index].Highlight(true);
+        }
     }
 }
