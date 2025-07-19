@@ -21,6 +21,7 @@ public class Maze : MonoBehaviour {
     const float CELL_SIZE = 0.5f;
     const int WIDTH = 10;
     const int HEIGHT = 13;
+    const float ADJUSTMENT_Y = -0.75f;
 
     void Awake() {
         SpawnCells();
@@ -35,7 +36,7 @@ public class Maze : MonoBehaviour {
             var row = i / WIDTH;
             var col = i % WIDTH;
             cell.name = $"Cell [{row},{col}]";
-            cell.transform.localPosition = new Vector3(col * CELL_SIZE + offsetX, -row * CELL_SIZE + offsetY, 0);
+            cell.transform.localPosition = new Vector3(col * CELL_SIZE + offsetX, -row * CELL_SIZE + offsetY + ADJUSTMENT_Y, 0);
             cell.transform.localScale = Vector3.one * CELL_SIZE;
             cells[i] = cell;
         }
