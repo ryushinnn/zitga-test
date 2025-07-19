@@ -1,15 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class Maze : MonoBehaviour {
     [SerializeField] Cell cellPrefab;
+    [SerializeField] Bug bug;
+    [SerializeField] Transform target;
+    [SerializeField] LineRenderer hint;
 
     Cell[] cells;
     MazeData data;
     Vector2Int start;
     Vector2Int end;
+    List<Vector3> waypoints;
+    bool pathRevealed;
+    bool bugMoved;
 
     const float CELL_SIZE = 0.5f;
     const int WIDTH = 10;
@@ -53,34 +60,62 @@ public class Maze : MonoBehaviour {
     }
 
     void GenerateMaze() {
-        var debug = "";
         for (int y = 0; y < HEIGHT; y++) {
-            string debugLine = "";
             for (int x = 0; x < WIDTH; x++) {
-                var c = data.Grid[y, x];
-                debugLine += "[";
-                debugLine += c.connections.Contains(Direction.Up) ? "U" : " ";
-                debugLine += c.connections.Contains(Direction.Down) ? "D" : " ";
-                debugLine += c.connections.Contains(Direction.Left) ? "L" : " ";
-                debugLine += c.connections.Contains(Direction.Right) ? "R" : " ";
-                debugLine += "]";
-
                 int index = y * WIDTH + x;
                 cells[index].Initialize(data.Grid[y, x]);
             }
-
-            debug += debugLine + "\n";
         }
-
-        Debug.Log(debug);
-        Debug.Log("Destination: " + end);
+        
         var path = MazePathFinder.Find(data.Grid, start, end);
-        foreach (var cell in cells) {
-            cell.Highlight(false);
+        GetWaypoints(path);
+        bug.transform.position = waypoints[0];
+        target.position = waypoints[^1];
+        pathRevealed = false;
+        bugMoved = false;
+        hint.positionCount = 0;
+    }
+
+    int GetCellIndex(Vector2Int vec) {
+        return vec.y * WIDTH + vec.x;
+    }
+
+    void GetWaypoints(List<Vector2Int> path) {
+        waypoints = new List<Vector3> { cells[GetCellIndex(path[0])].transform.position };
+
+        for (int i = 1; i < path.Count - 1; i++) {
+            var prev = path[i - 1];
+            var cur = path[i];
+            var next = path[i + 1];
+
+            if (cur - prev != next - cur) {
+                waypoints.Add(cells[GetCellIndex(cur)].transform.position);
+            }
         }
-        foreach (var node in path) {
-            int index = node.y * WIDTH + node.x;
-            cells[index].Highlight(true);
+        
+        waypoints.Add(cells[GetCellIndex(path[^1])].transform.position);
+    }
+
+    public void ShowPathToTarget() {
+        if (pathRevealed) return;
+
+        pathRevealed = true;
+        hint.positionCount = waypoints.Count;
+        for (int i=0; i<waypoints.Count; i++) {
+            hint.SetPosition(i, waypoints[i]);
         }
+        EditorConsole.Log("Path revealed");
+    }
+
+    public void LetBugMoveToTarget() {
+        if (!pathRevealed || bugMoved) return;
+
+        bugMoved = true;
+        bug.StartMove(waypoints);
+        EditorConsole.Log("Bug started moving");
+    }
+
+    public void CancelBugMovement() {
+        bug.StopMove();
     }
 }

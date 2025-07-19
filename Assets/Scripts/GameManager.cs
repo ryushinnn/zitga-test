@@ -17,4 +17,16 @@ public class GameManager : Singleton<GameManager> {
             DataManager.Instance.StagesData.SetStageGridAndRoute(stageIndex, grid, origin, destination);
         }
     }
+
+    public void Find() {
+        maze.ShowPathToTarget();
+    }
+
+    public void AutoMove() {
+        maze.LetBugMoveToTarget();
+    }
+
+    public void CancelMove() {
+        maze.CancelBugMovement();
+    }
 }

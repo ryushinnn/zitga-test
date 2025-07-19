@@ -7,10 +7,6 @@ public class DataManager : Singleton<DataManager> {
     
     protected override void OnAwake() {
         StagesData = StagesData.Get();
-        Debug.Log($"last: {StagesData.stages.Length}");
-    }
-
-    void Start() {
-        
+        EditorConsole.Log($"{StagesData.stages.Length} stages unlocked");
     }
 }

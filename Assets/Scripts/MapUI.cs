@@ -19,7 +19,7 @@ public class MapUI : BaseUI {
 
     void UnlockRandomStage() {
         var rand = Random.Range(1, 20);
-        Debug.Log($"unlock {rand}");
+        EditorConsole.Log($"{rand} stages unlocked");
         DataManager.Instance.StagesData.Unlock(rand);
     }
 
