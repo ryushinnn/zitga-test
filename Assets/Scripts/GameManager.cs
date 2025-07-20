@@ -5,6 +5,10 @@ using UnityEngine.UI;
 public class GameManager : Singleton<GameManager> {
     [SerializeField] Maze maze;
 
+    protected override void OnAwake() {
+        Application.targetFrameRate = 60;
+    }
+
     public void InitializeMaze(int stageIndex) {
         var stageData = DataManager.Instance.StagesData.GetStage(stageIndex);
         if (stageData.grid != null) {

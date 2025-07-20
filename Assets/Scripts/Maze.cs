@@ -18,7 +18,7 @@ public class Maze : MonoBehaviour {
     bool pathRevealed;
     bool bugMoved;
 
-    const float CELL_SIZE = 0.5f;
+    const float CELL_SIZE = 0.55f;
     const int WIDTH = 10;
     const int HEIGHT = 13;
     const float ADJUSTMENT_Y = -0.75f;
