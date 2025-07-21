@@ -10,11 +10,13 @@ public class MapUI_StageScrollView : MonoBehaviour {
     
     LinkedList<MapUI_StageRow> items = new();
     List<List<int>> dataList = new();
+    float contentHeight;
     float itemHeight;
     float itemWidth;
     int poolSize;
     int oldFirstVisibleIndex;
     int visibleItemCount;
+    Coroutine focusCoroutine;
     
     const int BUFFER = 2;
     const int STAGES_PER_ITEM = 4;
@@ -34,7 +36,7 @@ public class MapUI_StageScrollView : MonoBehaviour {
         }
 
         SpawnItems();
-        scrollRect.normalizedPosition = new Vector2(0, 0);
+        // scrollRect.normalizedPosition = new Vector2(0, 0);
     }
 
     void SpawnItems() {
@@ -43,7 +45,7 @@ public class MapUI_StageScrollView : MonoBehaviour {
         itemWidth = itemPrefab.Width;
 
         var totalRows = dataList.Count;
-        var contentHeight = itemHeight * totalRows;
+        contentHeight = itemHeight * totalRows;
 
         contentRect.anchorMax = new Vector2(1, 1);
         contentRect.anchorMin = new Vector2(0, 1);
@@ -122,5 +124,15 @@ public class MapUI_StageScrollView : MonoBehaviour {
         foreach (var item in items) {
             item.transform.SetSiblingIndex(index++);
         }
+    }
+
+    public void FocusAtStage(int stage) {
+        var row = dataList.Count - 1 - (stage - 1) / STAGES_PER_ITEM;
+        var y = contentHeight - (row + 0.5f) * itemHeight;
+        // scrollRect.FocusAtPoint(new Vector2(0, y));
+        if (focusCoroutine != null){
+            StopCoroutine(focusCoroutine);
+        }
+        focusCoroutine = StartCoroutine(scrollRect.FocusAtPoint(new Vector2(0, y), 2));
     }
 }

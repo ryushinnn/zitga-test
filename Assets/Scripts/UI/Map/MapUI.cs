@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -14,20 +15,28 @@ public class MapUI : BaseUI {
     }
 
     void Start() {
-        InitializeStagesScrollView(StagesData.MAX_STAGES);
+        InitializeStagesScrollView();
     }
 
     void UnlockRandomStage() {
-        var rand = Random.Range(1, 20);
+        var rand = Random.Range(1, StagesData.MAX_STAGES + 1);
         EditorConsole.Log($"{rand} stages unlocked");
         DataManager.Instance.StagesData.Unlock(rand);
+        stageScrollView.FocusAtStage(rand);
     }
 
     void ResetStages() {
         DataManager.Instance.StagesData.Reset();
+        stageScrollView.FocusAtStage(1);
     }
 
-    void InitializeStagesScrollView(int itemCount) {
-        stageScrollView.Initialize(itemCount);
+    void InitializeStagesScrollView() {
+        stageScrollView.Initialize(StagesData.MAX_STAGES);
+        StartCoroutine(DoScrollToCurrent());
+    }
+
+    IEnumerator DoScrollToCurrent() {
+        yield return new WaitForEndOfFrame();
+        stageScrollView.FocusAtStage(DataManager.Instance.StagesData.stages.Length);
     }
 }
