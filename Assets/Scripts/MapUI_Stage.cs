@@ -4,8 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class MapUI_Stage : MonoBehaviour {
-    [SerializeField] RectTransform rectTransform;
-    [SerializeField] TMP_Text labelText;
+    [SerializeField] TMP_Text indexText;
+    [SerializeField] Image tutorial;
     [SerializeField] Image[] starImages;
     [SerializeField] Image lockImage;
     [SerializeField] Button selfButton;
@@ -14,17 +14,15 @@ public class MapUI_Stage : MonoBehaviour {
     StageData stageData;
     bool available;
     
-    public RectTransform RectTransform => rectTransform;
-    public float Height => rectTransform.rect.height;
-    public float Width => rectTransform.rect.width;
-
     void Awake() {
         selfButton.onClick.AddListener(StartGame);
     }
 
     public void SetData(int stageIndex) {
         this.stageIndex = stageIndex;
-        labelText.text = this.stageIndex == 1 ? "Tutorial" : this.stageIndex.ToString();
+        indexText.text = this.stageIndex.ToString();
+        indexText.enabled = this.stageIndex != 1;
+        tutorial.enabled = this.stageIndex == 1;
         Refresh();
         DataManager.Instance.StagesData.OnChange += Refresh;
     }

@@ -1691,7 +1691,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unlockRandomButton: {fileID: 145170022}
   resetButton: {fileID: 355081324}
-  stagesScrollView: {fileID: 1950467162}
+  stageScrollView: {fileID: 1950467162}
 --- !u!1 &826529830
 GameObject:
   m_ObjectHideFlags: 0
@@ -2448,7 +2448,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scrollRect: {fileID: 1950467159}
   contentRect: {fileID: 2113686702}
-  itemPrefab: {fileID: 679202634923394542, guid: 81862251e8156b94ea162c2ba0afd316, type: 3}
+  itemPrefab: {fileID: 8446335946189498198, guid: 84ce2deec8988b642af2f30d0f31dbc4, type: 3}
 --- !u!1 &2070511974
 GameObject:
   m_ObjectHideFlags: 0

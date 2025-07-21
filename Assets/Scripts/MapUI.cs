@@ -6,7 +6,7 @@ using Random = UnityEngine.Random;
 public class MapUI : BaseUI {
     [SerializeField] Button unlockRandomButton;
     [SerializeField] Button resetButton;
-    [SerializeField] MapUI_StagesScrollView stagesScrollView;
+    [SerializeField] MapUI_StageScrollView stageScrollView;
 
     void Awake() {
         unlockRandomButton.onClick.AddListener(UnlockRandomStage);
@@ -28,6 +28,6 @@ public class MapUI : BaseUI {
     }
 
     void InitializeStagesScrollView(int itemCount) {
-        stagesScrollView.Initialize(itemCount);
+        stageScrollView.Initialize(itemCount);
     }
 }

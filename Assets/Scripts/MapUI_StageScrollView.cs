@@ -3,70 +3,56 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MapUI_StagesScrollView : MonoBehaviour {
+public class MapUI_StageScrollView : MonoBehaviour {
     [SerializeField] ScrollRect scrollRect;
     [SerializeField] RectTransform contentRect;
-    [SerializeField] MapUI_Stage itemPrefab;
+    [SerializeField] MapUI_StageRow itemPrefab;
     
-    int itemCount;
-    LinkedList<MapUI_Stage> items = new();
-    List<int> dataList = new();
+    LinkedList<MapUI_StageRow> items = new();
+    List<List<int>> dataList = new();
     float itemHeight;
     float itemWidth;
     int poolSize;
     int oldFirstVisibleIndex;
     int visibleItemCount;
-    int debt;
-    bool shiftFirstRowToLeft;
     
     const int BUFFER = 2;
-    const int ITEMS_PER_ROW = 4;
+    const int STAGES_PER_ITEM = 4;
 
-    public void Initialize(int itemCount) {
-        this.itemCount = itemCount;
-        var testDataList = new List<int>();
-        debt = (ITEMS_PER_ROW - this.itemCount % ITEMS_PER_ROW) % ITEMS_PER_ROW;
-        var groupIndex = (this.itemCount + debt) / ITEMS_PER_ROW - 1;
-        for (int i = this.itemCount + debt; i >= 1; i -= 4) {
-            var group = new List<int>();
-            for (int j = 0; j < 4 && (i - j) >= 1; j++) {
-                if (i - j <= this.itemCount) {
-                    group.Add(i-j);
+    public void Initialize(int stageCount) {
+        var r = stageCount % STAGES_PER_ITEM;
+        var perfectStageCount = stageCount + (r == 0 ? 0 : STAGES_PER_ITEM - r);
+        for (int i = perfectStageCount; i >= 1; i -= STAGES_PER_ITEM) {
+            var sequence = new List<int>();
+            for (int j = STAGES_PER_ITEM - 1; j >= 0; j--) {
+                if (i - j <= stageCount) {
+                    sequence.Add(i-j);
                 }
             }
-
-            if (groupIndex % 2 == 0) {
-                group.Sort();
-            }
             
-            testDataList.AddRange(group);
-            groupIndex--;
+            dataList.Add(sequence);
         }
 
-        SpawnItems(testDataList);
+        SpawnItems();
         scrollRect.normalizedPosition = new Vector2(0, 0);
     }
 
-    void SpawnItems(List<int> dataList) {
-        this.dataList = dataList;
-
+    void SpawnItems() {
         var scrollRT = scrollRect.GetComponent<RectTransform>();
         itemHeight = itemPrefab.Height;
         itemWidth = itemPrefab.Width;
 
-        // var totalRows = Mathf.CeilToInt((float)this.dataList.Count / itemsPerRow);
-        var totalRows = (this.dataList.Count + debt) / ITEMS_PER_ROW;
+        var totalRows = dataList.Count;
         var contentHeight = itemHeight * totalRows;
-        shiftFirstRowToLeft = totalRows % 2 == 1;
 
         contentRect.anchorMax = new Vector2(1, 1);
         contentRect.anchorMin = new Vector2(0, 1);
 
-        visibleItemCount = (int)(scrollRT.rect.height / itemHeight) * ITEMS_PER_ROW;
+        visibleItemCount = (int)(scrollRT.rect.height / itemHeight);
         contentRect.sizeDelta = new Vector2(contentRect.sizeDelta.x, contentHeight);
         
-        poolSize = visibleItemCount + (BUFFER * 2 * ITEMS_PER_ROW);
-        var index = -BUFFER * ITEMS_PER_ROW;
+        poolSize = visibleItemCount + (BUFFER * 2);
+        var index = -BUFFER;
         for (int i = 0; i < poolSize; i++) {
             var item = Instantiate(itemPrefab, contentRect);
             items.AddLast(item);
@@ -79,44 +65,45 @@ public class MapUI_StagesScrollView : MonoBehaviour {
     void OnScroll(Vector2 scrollPos) {
         var contentY = contentRect.anchoredPosition.y;
         var firstVisibleRow = Mathf.Max(0, Mathf.FloorToInt(contentY / (itemHeight)));
-        var firstVisibleIndex = firstVisibleRow * ITEMS_PER_ROW;
+        var firstVisibleIndex = firstVisibleRow;
 
         if (oldFirstVisibleIndex != firstVisibleIndex) {
-            var diff = (oldFirstVisibleIndex - firstVisibleIndex) / ITEMS_PER_ROW;
+            var diff = (oldFirstVisibleIndex - firstVisibleIndex);
             if (diff < 0) {
                 var lastVisibleIndex = oldFirstVisibleIndex + visibleItemCount;
-                var count = Mathf.Abs(diff) * ITEMS_PER_ROW;
+                var count = Mathf.Abs(diff);
                 for (int i = 0; i < count; i++) {
                     var item = items.First.Value;
                     items.RemoveFirst();
                     items.AddLast(item);
-                    var newIndex = lastVisibleIndex + (BUFFER * ITEMS_PER_ROW) + i;
+                    var newIndex = lastVisibleIndex + (BUFFER) + i;
                     UpdateItem(item, newIndex);
                 }
             }
             else if (diff > 0) {
-                var count = Mathf.Abs(diff) * ITEMS_PER_ROW;
+                var count = Mathf.Abs(diff);
                 for (int i = 0; i < count; i++) {
                     var item = items.Last.Value;
                     items.RemoveLast();
                     items.AddFirst(item);
-                    var newIndex = oldFirstVisibleIndex - (BUFFER * ITEMS_PER_ROW) - i;
+                    var newIndex = oldFirstVisibleIndex - (BUFFER) - i;
                     UpdateItem(item, newIndex);
                 }
             }
             oldFirstVisibleIndex = firstVisibleIndex;
         }
+        
+        RearrangeItemsInHierarchy();
     }
 
-    void UpdateItem(MapUI_Stage item, int index) {
-        var row = 0 <= index + debt ? (index + debt) / ITEMS_PER_ROW : (index + debt - 1) / ITEMS_PER_ROW;
-        var col = row == 0 && shiftFirstRowToLeft ? Mathf.Abs(index) % ITEMS_PER_ROW : Mathf.Abs(index + debt) % ITEMS_PER_ROW;
+    void UpdateItem(MapUI_StageRow item, int index) {
+        var row = 0 <= index ? index : index - 1;
         var pivot = item.RectTransform.pivot;
-        var totalWidth = ITEMS_PER_ROW * itemWidth;
+        var totalWidth = itemWidth;
         var contentWidth = contentRect.rect.width;
         var offsetX = (contentWidth - totalWidth) / 2f;
         var y = -(row * itemHeight) - itemHeight * (1 - pivot.y);
-        var x = (col * itemWidth + itemWidth * pivot.x) + offsetX;
+        var x = (itemWidth * pivot.x) + offsetX;
 
         item.RectTransform.localPosition = new Vector3(x, y, 0);
 
@@ -127,6 +114,13 @@ public class MapUI_StagesScrollView : MonoBehaviour {
         else {
             item.SetData(dataList[index]);
             item.gameObject.SetActive(true);
+        }
+    }
+
+    void RearrangeItemsInHierarchy() {
+        var index = 0;
+        foreach (var item in items) {
+            item.transform.SetSiblingIndex(index++);
         }
     }
 }
